@@ -2,12 +2,13 @@ import streamlit as st
 import requests
 
 st.set_page_config(page_title="Cold Email Generator", page_icon="📧")
-st.title("📧 Free Cold Email Generator (Groq + Mixtral)")
+st.title("📧 Cold Email Generator")
 
-# Load API key securely from Streamlit secrets
+# Footer credit
+st.markdown("<p style='text-align:right; font-size:14px;'>Made by <b>Siddarth Choudhary</b></p>", unsafe_allow_html=True)
+
 GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
 
-# Input fields
 product = st.text_area("🧾 Product/Service Description")
 audience = st.text_input("🎯 Target audience")
 tone = st.selectbox("🗣️ Tone", ["Formal", "Friendly", "Casual", "Persuasive"])
@@ -26,7 +27,7 @@ CTA: {cta}
 Keep it short and engaging."""
 
             try:
-                response = requests.post(
+                res = requests.post(
                     "https://api.groq.com/openai/v1/chat/completions",
                     headers={
                         "Authorization": f"Bearer {GROQ_API_KEY}",
@@ -39,14 +40,20 @@ Keep it short and engaging."""
                         "max_tokens": 400
                     }
                 )
-                data = response.json()
-
-                # Check if response contains choices
+                data = res.json()
                 if "choices" in data:
-                    email = data["choices"][0]["message"]["content"]
-                    st.text_area("📨 Generated Email", value=email, height=300)
+                    default_email = data["choices"][0]["message"]["content"]
+                    st.subheader("📨 Generated Email (Editable)")
+                    final_email = st.text_area("Edit the email if you'd like", value=default_email, height=300, key="editable_email")
+
+                    # Download button
+                    st.download_button(
+                        label="💾 Download Email",
+                        data=final_email,
+                        file_name="cold_email.txt",
+                        mime="text/plain"
+                    )
                 else:
                     st.error(f"❌ Unexpected API response:\n\n{data}")
-
             except Exception as e:
                 st.error(f"🚨 Request failed: {e}")
