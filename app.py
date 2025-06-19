@@ -4,8 +4,10 @@ import requests
 st.set_page_config(page_title="Cold Email Generator", page_icon="📧")
 st.title("📧 Free Cold Email Generator (Groq + Mixtral)")
 
+# Load API key securely from Streamlit secrets
 GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
 
+# Input fields
 product = st.text_area("🧾 Product/Service Description")
 audience = st.text_input("🎯 Target audience")
 tone = st.selectbox("🗣️ Tone", ["Formal", "Friendly", "Casual", "Persuasive"])
@@ -24,7 +26,7 @@ CTA: {cta}
 Keep it short and engaging."""
 
             try:
-                res = requests.post(
+                response = requests.post(
                     "https://api.groq.com/openai/v1/chat/completions",
                     headers={
                         "Authorization": f"Bearer {GROQ_API_KEY}",
@@ -37,7 +39,14 @@ Keep it short and engaging."""
                         "max_tokens": 400
                     }
                 )
-                email = res.json()['choices'][0]['message']['content']
-                st.text_area("📨 Generated Email", value=email, height=300)
+                data = response.json()
+
+                # Check if response contains choices
+                if "choices" in data:
+                    email = data["choices"][0]["message"]["content"]
+                    st.text_area("📨 Generated Email", value=email, height=300)
+                else:
+                    st.error(f"❌ Unexpected API response:\n\n{data}")
+
             except Exception as e:
-                st.error(f"Error: {e}")
+                st.error(f"🚨 Request failed: {e}")
