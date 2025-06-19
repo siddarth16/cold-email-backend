@@ -33,7 +33,7 @@ Keep it short and engaging."""
                         "Content-Type": "application/json"
                     },
                     json={
-                        "model": "llama3-3.3b-70b-versatile",
+                        "model": "llama3-70b-8192",,
                         "messages": [{"role": "user", "content": prompt}],
                         "temperature": 0.7,
                         "max_tokens": 400
